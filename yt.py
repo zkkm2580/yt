@@ -1,10 +1,10 @@
 import subprocess
 import json
 
-def extract_m3u8_with_ytdlp(youtube_url):
+def extract_m3u8_with_ytdlp(youtube_url, cookies_file="cookies.txt"):
     try:
-        # 使用 yt-dlp 提取视频格式信息
-        command = ["yt-dlp", "--dump-json", youtube_url]
+        # 使用 yt-dlp 提取视频格式信息，并使用 cookies 文件
+        command = ["yt-dlp", "--cookies", cookies_file, "--dump-json", youtube_url]
         result = subprocess.run(command, capture_output=True, text=True)
 
         # 检查命令是否执行成功
@@ -52,8 +52,9 @@ if __name__ == "__main__":
     # 输入 YouTube 直播视频的 URL
     youtube_url = "https://www.youtube.com/watch?v=vr3XyVCR4T0"
 
-    # 提取 .m3u8 流链接
-    m3u8_url = extract_m3u8_with_ytdlp(youtube_url)
+    # 提取 .m3u8 流链接，并使用 cookies
+    cookies_file = "cookies.txt"  # 设置 cookies.txt 文件路径
+    m3u8_url = extract_m3u8_with_ytdlp(youtube_url, cookies_file)
 
     # 如果找到 .m3u8 链接，生成日志文件
     if m3u8_url:
