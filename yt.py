@@ -35,20 +35,18 @@ def extract_m3u8_with_ytdlp(youtube_url):
         print("发生错误:", e)
         return None
 
-def generate_m3u_playlist(m3u8_url, output_file="playlist.m3u"):
+def generate_log_file(m3u8_url, output_file="result.log"):
     try:
         if not m3u8_url:
-            print("无效的 .m3u8 链接，无法生成播放列表。")
+            print("无效的 .m3u8 链接，无法生成日志文件。")
             return
-
-        # 创建 M3U 播放列表文件
-        m3u_content = f"#EXTM3U\n#EXTINF:-1,YouTube Live Stream\n{m3u8_url}\n"
+        
+        # 创建日志文件
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write(m3u_content)
-
-        print(f"M3U 播放列表文件已生成: {output_file}")
+            f.write(f"Found m3u8 URL: {m3u8_url}\n")
+        print(f"日志文件已生成: {output_file}")
     except Exception as e:
-        print("生成 M3U 播放列表时发生错误:", e)
+        print("生成日志文件时发生错误:", e)
 
 if __name__ == "__main__":
     # 输入 YouTube 直播视频的 URL
@@ -57,6 +55,6 @@ if __name__ == "__main__":
     # 提取 .m3u8 流链接
     m3u8_url = extract_m3u8_with_ytdlp(youtube_url)
 
-    # 如果找到 .m3u8 链接，生成播放列表
+    # 如果找到 .m3u8 链接，生成日志文件
     if m3u8_url:
-        generate_m3u_playlist(m3u8_url)
+        generate_log_file(m3u8_url)
