@@ -13,7 +13,7 @@ def get_best_m3u8_link(youtube_url):
     """获取最佳 .m3u8 链接"""
     # 先运行 yt-dlp -F 获取视频格式
     print(f"获取视频格式信息: yt-dlp -F {youtube_url}")
-    command = ["yt-dlp", "-F", youtube_url]
+    command = ["yt-dlp", "--cookies cookies.txt", -F", youtube_url]
     format_info = run_yt_dlp(command)
     if format_info is None:
         return None
@@ -21,7 +21,7 @@ def get_best_m3u8_link(youtube_url):
     print("视频格式信息已获取，正在获取最佳 .m3u8 链接...")
 
     # 然后运行 yt-dlp -f best --get-url 获取最佳 .m3u8 链接
-    command = ["yt-dlp", "-f", "best", "--get-url", youtube_url]
+    command = ["yt-dlp", "--cookies cookies.txt", -f", "best", "--get-url", youtube_url]
     m3u8_url = run_yt_dlp(command)
     if m3u8_url is None:
         return None
