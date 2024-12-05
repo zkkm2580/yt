@@ -1,61 +1,48 @@
 import subprocess
-import json
 
-def extract_m3u8_with_ytdlp(youtube_url, cookies_file="cookies.txt"):
+def run_yt_dlp(command):
+    """运行 yt-dlp 命令并返回结果"""
     try:
-        # 使用 yt-dlp 提取视频格式信息，并使用 cookies 文件
-        command = ["yt-dlp", "--cookies", cookies_file, "--dump-json", youtube_url]
-        result = subprocess.run(command, capture_output=True, text=True)
-
-        # 检查命令是否执行成功
-        if result.returncode != 0:
-            print(f"yt-dlp 错误: {result.stderr}")
-            return None
-
-        # 解析 yt-dlp 输出的 JSON 数据
-        video_info = json.loads(result.stdout)
-
-        # 打印视频信息以调试
-        print(json.dumps(video_info, indent=4))  # 查看详细输出
-
-        # 查找 .m3u8 格式的链接
-        m3u8_url = None
-        for fmt in video_info.get("formats", []):
-            if fmt.get("protocol") == "m3u8_native":
-                # 选择 URL 字段
-                m3u8_url = fmt.get("url")
-                print("找到的 .m3u8 流链接:", m3u8_url)
-                break
-
-        if not m3u8_url:
-            print("未找到 .m3u8 流链接。")
-
-        return m3u8_url
-    except Exception as e:
-        print("发生错误:", e)
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"运行命令出错: {e}")
         return None
 
-def generate_log_file(m3u8_url, output_file="result.log"):
+def get_best_m3u8_link(youtube_url):
+    """获取最佳 .m3u8 链接"""
+    # 先运行 yt-dlp -F 获取视频格式
+    print(f"获取视频格式信息: yt-dlp -F {youtube_url}")
+    command = ["yt-dlp", "-F", youtube_url]
+    format_info = run_yt_dlp(command)
+    if format_info is None:
+        return None
+
+    print("视频格式信息已获取，正在获取最佳 .m3u8 链接...")
+
+    # 然后运行 yt-dlp -f best --get-url 获取最佳 .m3u8 链接
+    command = ["yt-dlp", "-f", "best", "--get-url", youtube_url]
+    m3u8_url = run_yt_dlp(command)
+    if m3u8_url is None:
+        return None
+    
+    # 去除多余的空格和换行符
+    m3u8_url = m3u8_url.strip()
+    print(f"找到的 .m3u8 链接: {m3u8_url}")
+    return m3u8_url
+
+def save_m3u8_url(m3u8_url, filename="zt.m3u8"):
+    """将 .m3u8 链接保存到文件"""
     try:
-        if not m3u8_url:
-            print("无效的 .m3u8 链接，无法生成日志文件。")
-            return
-        
-        # 创建日志文件
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(f"Found m3u8 URL: {m3u8_url}\n")
-        print(f"日志文件已生成: {output_file}")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(m3u8_url)
+        print(f"已将 .m3u8 链接保存到 {filename}")
     except Exception as e:
-        print("生成日志文件时发生错误:", e)
+        print(f"保存 .m3u8 链接时出错: {e}")
 
 if __name__ == "__main__":
-    # 输入 YouTube 直播视频的 URL
-    youtube_url = "https://www.youtube.com/watch?v=vr3XyVCR4T0"
-
-    # 提取 .m3u8 流链接，并使用 cookies
-    cookies_file = "cookies.txt"  # 设置 cookies.txt 文件路径
-    m3u8_url = extract_m3u8_with_ytdlp(youtube_url, cookies_file)
-
-    # 如果找到 .m3u8 链接，生成日志文件
+    youtube_url = "https://www.youtube.com/watch?v=vr3XyVCR4T0"  # 替换为你的 YouTube 视频链接
+    m3u8_url = get_best_m3u8_link(youtube_url)
+    
     if m3u8_url:
-        generate_log_file(m3u8_url)
+        save_m3u8_url(m3u8_url)
