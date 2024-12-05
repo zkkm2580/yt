@@ -27,4 +27,4 @@ jobs:
 
     - name: Run Python script
       run: |
-        python your_script_name.py  # 替换为你的脚本名
+        python yt.py  # 替换为你的脚本名
